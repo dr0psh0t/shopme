@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="ISO-8859-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>Users</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
+    <script th:src="@{/js/users.js}"></script>
+    <link rel="shortcut icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
+    <link rel="icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
+
+</head>
+<body>
+
+<div th:replace="fragments :: symbols"></div>
+<div th:replace="fragments :: header"></div>
+
+<div class="container">
+
+    <div sec:authorize="hasAuthority('Admin')">
+        <br>
+        <a th:href="@{/AddUserForm}" class="shopme-text-color" ><svg class="bi" width="20" height="20" fill="#ff4f00"><use xlink:href="#createuser"/></svg>
+            <h5 style="display:inline">&nbsp;Create User</h5></a>&nbsp;|&nbsp;
+        <span class="dropdown">
+            <a th:href="@{/AddUserForm}" class="shopme-text-color" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg class="bi" width="20" height="20" fill="#ff4f00"><use xlink:href="#export"/></svg>
+                <h5 style="display:inline">Export Users</h5>
+            </a>
+            <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLink">
+                <li><a th:href="@{/CsvExport}" class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00"><use xlink:href="#csv"/></svg>&nbsp;CSV</a></li>
+                <li><a th:href="@{/ExcelExport}" class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00"><use xlink:href="#excel"/></svg>&nbsp;Excel</a></li>
+                <li><a th:href="@{/PdfExport}" class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00"><use xlink:href="#pdf"/></svg>&nbsp;PDF</a></li>
+            </ul>
+        </span>
+    </div>
+
+    <form id="searchForm" class="row gx-3 gy-2 align-items-center" action="#" th:action="@{/Search}" method="post"
+          style="margin-top: 10px;margin-bottom: 15px">
+        <div class="col-sm-3">
+            <input type="text" placeholder="Search User" id="keyword" name="keyword" class="form-control">
+        </div>
+        <div class="col-auto">
+            <button id="searchButton" type="button" class="btn shopme-color white">Search</button>
+        </div>
+        <div class="col-auto">
+            <button id="clearButton" type="button" class="btn btn-secondary">Clear</button>
+        </div>
+    </form>
+
+    <div th:if="${isSearching}">[[${searchMessage}]]</div>
+
+    <div th:if="${alertMessage != null}" id="success-alert" class="alert alert-success d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+        <div>[[${alertMessage}]]</div>
+    </div>
+
+    <table class="table table-bordered table-striped" style="margin-top: 15px">
+        <thead class="thead-dark">
+        <tr th:if="${isSearching}">
+            <th>
+                <a th:href="@{'/SortFromSearch/id?keyword='+${keyword}+'&dir='+${reverseSortDir}+'&page='+${currentPage}}" class="shopme-text-color">
+                    User ID
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('id')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+            </th>
+            <th class="shopme-text-color">Photo</th>
+            <th>
+                <a th:href="@{'/SortFromSearch/email?keyword='+${keyword}+'&dir='+${reverseSortDir}+'&page='+${currentPage}}" class="shopme-text-color">
+                    E-mail
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('email')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{'/SortFromSearch/firstName?keyword='+${keyword}+'&dir='+${reverseSortDir}+'&page='+${currentPage}}" class="shopme-text-color">
+                    First Name
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('firstName')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{'/SortFromSearch/lastName?keyword='+${keyword}+'&dir='+${reverseSortDir}+'&page='+${currentPage}}" class="shopme-text-color">
+                    Last Name
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('lastName')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+            </th>
+            <th class="shopme-text-color">Role</th>
+            <th>
+                <a th:href="@{'/SortFromSearch/enabled?keyword='+${keyword}+'&dir='+${reverseSortDir}+'&page='+${currentPage}}" class="shopme-text-color">
+                    Enabled
+                    <span th:if="${field != null}">
+                        <span th:if="${field.equals('enabled')}">
+                            <span th:if="${reverseSortDir.equals('asc')}">
+                                <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                            </span>
+                            <span th:unless="${reverseSortDir.equals('asc')}">
+                                <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                            </span>
+                        </span>
+                    </span>
+                </a>
+            </th>
+            <th class="shopme-text-color">Action</th>
+        </tr>
+        <tr th:unless="${isSearching}">
+            <th>
+                <a href="#" class="shopme-text-color" id="dropdownMenuLinkId" data-bs-toggle="dropdown" aria-expanded="false">
+                    User ID
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('id')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+                <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLinkId">
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/id?sortDir='+${reverseSortDir}+'&single=true'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort id in this page
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/id?sortDir='+${reverseSortDir}+'&single=false'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort all IDs
+                        </a>
+                    </li>
+                </ul>
+
+            </th>
+            <th class="shopme-text-color">Photo</th>
+            <th>
+
+                <a href="#" class="shopme-text-color" id="dropdownMenuLinkEmail" data-bs-toggle="dropdown" aria-expanded="false">
+                    E-mail
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('email')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+                <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLinkEmail">
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/email?sortDir='+${reverseSortDir}+'&single=true'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort email in this page
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/email?sortDir='+${reverseSortDir}+'&single=false'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort all emails
+                        </a>
+                    </li>
+                </ul>
+
+            </th>
+            <th>
+                <a href="#" class="shopme-text-color" id="dropdownMenuLinkFname" data-bs-toggle="dropdown" aria-expanded="false">
+                    First Name
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('firstName')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+                <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLinkFname">
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/firstName?sortDir='+${reverseSortDir}+'&single=true'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort firstname in this page
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/firstName?sortDir='+${reverseSortDir}+'&single=false'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort all firstnames
+                        </a>
+                    </li>
+                </ul>
+            </th>
+            <th>
+                <a href="#" class="shopme-text-color" id="dropdownMenuLinkLname" data-bs-toggle="dropdown" aria-expanded="false">
+                    Last Name
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('lastName')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+                <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLinkLname">
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/lastName?sortDir='+${reverseSortDir}+'&single=true'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort lastname in this page
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/lastName?sortDir='+${reverseSortDir}+'&single=false'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort all lastnames
+                        </a>
+                    </li>
+                </ul>
+            </th>
+            <th class="shopme-text-color">Roles</th>
+            <th>
+                <a href="#" class="shopme-text-color" id="dropdownMenuLinkEnabled" data-bs-toggle="dropdown" aria-expanded="false">
+                    Enabled
+                    <span th:if="${field != null}">
+                            <span th:if="${field.equals('enabled')}">
+                                <span th:if="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-down-fill"/></svg>
+                                </span>
+                                <span th:unless="${reverseSortDir.equals('asc')}">
+                                    <svg class="bi" width="24" height="24"><use xlink:href="#caret-up-fill"/></svg>
+                                </span>
+                            </span>
+                        </span>
+                </a>
+                <ul class="dropdown-menu shopme-text-color" aria-labelledby="dropdownMenuLinkEnabled">
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/enabled?sortDir='+${reverseSortDir}+'&single=true'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort enabled in this page
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/Users/'+${currentPage}+'/enabled?sortDir='+${reverseSortDir}+'&single=false'}"
+                           class="shopme-text-color dropdown-item"><svg class="bi" width="20" height="20" fill="#ff4f00">
+                            <use xlink:href="#sort_number_down"/></svg>
+                            Sort all enabled
+                        </a>
+                    </li>
+                </ul>
+            </th>
+            <th class="shopme-text-color">Action</th>
+        </tr>
+
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}" />
+            <td class="center">
+                <img width="100px" height="100px" class='img-thumbnail'
+                     th:src="@{/GetPhoto/{id}(id=${user.id})}" th:alt="${user.firstName}" />
+            </td>
+            <td th:text="${user.email}" />
+            <td th:text="${user.firstName}"/>
+            <td th:text="${user.lastName}"/>
+            <td th:text="${user.roles}"/>
+            <td th:switch="${user.enabled}" class="center">
+
+                <div th:if="${#authorization.expression('hasAuthority(''Admin'')')}">
+                    <a href="#" th:case="1" data-bs-toggle="modal" th:data-bs-target="'#disableModal' + ${user.id}">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#check"/></svg>
+                    </a>
+                    <a href="#" th:case="0" data-bs-toggle="modal" th:data-bs-target="'#enableModal' + ${user.id}">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#cross"/></svg>
+                    </a>
+                </div>
+                <div th:unless="${#authorization.expression('hasAuthority(''Admin'')')}">
+                    <a th:case="1">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#check"/></svg>
+                    </a>
+                    <a th:case="0">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#cross"/></svg>
+                    </a>
+                </div>
+
+                <div class="modal fade" th:id="'disableModal' + ${user.id}" tabindex="-1" aria-labelledby="disableModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="disableModalLabel">Disable Warning!</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to disable [[${user.firstName}]] [[${user.LastName}]]
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a th:if="${isSearching}" th:href="@{/DisableFromSearch(userid=${user.id},keyword=${keyword},page=${currentPage})}" class="btn btn-danger">Disable</a>
+                                <a th:unless="${isSearching}" th:href="@{/Disable(userid=${user.id},page=${currentPage})}" class="btn btn-danger">Disable</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" th:id="'enableModal' + ${user.id}" tabindex="-1" aria-labelledby="enableModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="enableModalLabel">Enable Warning!</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to enable [[${user.firstName}]] [[${user.LastName}]]
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a th:if="${isSearching}" th:href="@{/EnableFromSearch(userid=${user.id},keyword=${keyword},page=${currentPage})}" class="btn btn-success">Enable</a>
+                                <a th:unless="${isSearching}" th:href="@{/Enable(userid=${user.id},page=${currentPage})}" class="btn btn-success">Enable</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </td>
+            <td class="center">
+
+                <div th:if="${#authorization.expression('hasAuthority(''Admin'')')}">
+                    <a th:href="@{/UpdateUserForm(userId=${user.id},page=${currentPage!=null?currentPage:1})}">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#penfill"/></svg>
+                    </a>
+                    <a href="#" data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${user.id}">
+                        <svg class="bi" width="24" height="24"><use xlink:href="#trash"/></svg>
+                    </a>
+                </div>
+                <div th:unless="${#authorization.expression('hasAuthority(''Admin'')')}">
+                    <a><svg class="bi" width="24" height="24"><use xlink:href="#penfill"/></svg></a>
+                    <a><svg class="bi" width="24" height="24"><use xlink:href="#trash"/></svg></a>
+                </div>
+
+                <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Delete Warning!</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete [[${user.firstName}]] [[${user.LastName}]]
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a th:if="${isSearching}" th:href="@{/DeleteThenSearch(userid=${user.id},keyword=${keyword},page=${currentPage})}" class="btn btn-danger">Delete</a>
+                                <a th:unless="${isSearching}" th:href="@{/DeleteUser(userId=${user.id})}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <footer class="panel-footer">
+        <nav aria-label="Page navigation example">
+            <div style="text-align: center">
+                Total Items: [[${totalItems}]] : Page [[${currentPage}]] of [[${totalPages}]]
+            </div>
+
+            <ul class="pagination justify-content-center">
+
+                <li class="page-item" th:if="${currentPage > 1}">
+                    <a class="page-link" th:if="${isSearching}" th:href="@{'/Search/'+${keyword}+'/1'}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#first"/></svg>
+                    </a>
+                    <a class="page-link" th:unless="${isSearching}" th:href="@{/Users/1}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#first"/></svg>
+                    </a>
+                </li>
+                <li class="page-item disabled" th:unless="${currentPage > 1}">
+                    <a class="page-link">
+                        <svg class="bi" width="20" height="20"><use fill="#808080" xlink:href="#first"/></svg>
+                    </a>
+                </li>
+
+                <li class="page-item" th:if="${currentPage > 1}">
+                    <a class="page-link" th:if="${isSearching}" th:href="@{'/Search/'+${keyword}+'/1'}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#prev"/></svg>
+                    </a>
+                    <a class="page-link" th:unless="${isSearching}" th:href="@{'/Users/'+${currentPage - 1}}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#prev"/></svg>
+                    </a>
+                </li>
+                <li class="page-item disabled" th:unless="${currentPage > 1}">
+                    <a class="page-link">
+                        <svg class="bi" width="20" height="20"><use fill="#808080" xlink:href="#prev"/></svg>
+                    </a>
+                </li>
+
+                <span th:each="i: ${#numbers.sequence(
+                    (currentPage+5>totalPages)?(totalPages-5):currentPage,
+                    (currentPage+5>totalPages)?totalPages:currentPage+5)}">
+                    <span th:if="${i > 0}">
+                        <li class="page-item" th:if="${i != currentPage}">
+                            <a class="page-link" th:if="${isSearching}" th:href="@{'/Search/'+${keyword}+'/'+${i}}" style="color: #ff4f00">[[${i}]]</a>
+                            <a class="page-link" th:unless="${isSearching}" th:href="@{'/Users/'+${i}}" style="color: #ff4f00">[[${i}]]</a>
+                        </li>
+                        <li class="page-item disabled" th:unless="${i != currentPage}">
+                            <a class="page-link">[[${i}]]</a>
+                        </li>
+                    </span>
+                </span>
+
+                <li class="page-item" th:if="${currentPage < totalPages}">
+                    <a class="page-link" th:if="${isSearching}" th:href="@{'/Search/'+${keyword}+'/'+${currentPage+1}}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#next"/></svg>
+                    </a>
+                    <a class="page-link" th:unless="${isSearching}" th:href="@{'/Users/'+${currentPage+1}}">
+                        <svg class="bi" width="20" height="20"><use fill="#ff4f00" xlink:href="#next"/></svg>
+                    </a>
+                </li>
+                <li class="page-item disabled" th:unless="${currentPage < totalPages}">
+                    <a class="page-link">
+                        <svg class="bi" width="20" height="20"><use fill="#808080" xlink:href="#next"/></svg>
+                    </a>
+                </li>
+
+                <li class="page-item" th:if="${currentPage < totalPages}">
+                    <a class="page-link" th:if="${isSearching}" th:href="@{'/Search/'+${keyword}+'/'+${totalPages}}">
+                        <svg class="bi" width="20" height="20" ><use fill="#ff4f00" xlink:href="#last"/></svg>
+                    </a>
+                    <a class="page-link" th:unless="${isSearching}" th:href="@{'/Users/'+${totalPages}}">
+                        <svg class="bi" width="20" height="20" ><use fill="#ff4f00" xlink:href="#last"/></svg>
+                    </a>
+                </li>
+                <li class="page-item disabled" th:unless="${currentPage < totalPages}">
+                    <a class="page-link">
+                        <svg class="bi" width="20" height="20"><use fill="#808080" xlink:href="#last"/></svg>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </footer>
+
+</div>
+
+<br>
+
+<div th:replace="fragments :: footer"></div>
+
+</body>
+</html>

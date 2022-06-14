@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>Orders</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
+    <link rel="shortcut icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
+    <link rel="icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
+
+</head>
+<body>
+
+<div th:replace="fragments :: symbols"></div>
+<div th:replace="fragments :: header"></div>
+<br>
+<div class="container">
+    <img th:src="@{/images/shopme.svg}" width="500px" height="500px"><span><h3 style="display:inline;">Website under contruction</h3></span>
+</div>
+<br>
+<div th:replace="fragments :: footer"></div>
+
+</body>
+</html>

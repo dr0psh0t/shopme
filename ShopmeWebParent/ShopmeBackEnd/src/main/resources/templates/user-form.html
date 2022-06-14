@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Save User</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/user-form.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/user-form.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
+
+</head>
+<body>
+
+<div th:replace="fragments :: symbols"></div>
+<div th:replace="fragments :: header"></div>
+
+<br>
+
+<div class="container">
+
+    <h3 class="shopme-text-color">Manage User |
+        <span th:if="${isUpdate}">Edit User (ID: [[${user.id}]])</span>
+        <span th:unless="${isUpdate}">Create New User</span>
+    </h3>
+    <hr>
+
+    <div class="modal fade" id="emailAjaxModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Email is taken.</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="userForm" action="#" th:action="@{/SaveUser}" th:object="${user}" method="POST" enctype="multipart/form-data">
+
+        <input id="idField" type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{filename}" />
+        <input type="hidden" name="isUpdate" th:value="${isUpdate}">
+        <input type="hidden" name="page" th:if="${isUpdate}" th:value="${page}">
+        <input type="hidden" name="page" th:unless="${isUpdate}" value="0">
+
+        <label for="formFile" class="form-label">Email:</label>
+        <input id="emailTxt" type="email" th:field="*{email}" class="form-control mb-4 col-4" placeholder="Email" />
+
+        <div th:each="err : ${#fields.errors('firstName')}" th:text="${err}" class="error" ></div>
+		<label for="formFile" class="form-label">First Name:</label>
+        <input type="text" th:field="*{firstName}" class="form-control mb-4 col-4" placeholder="First name" />
+
+        <div th:each="err : ${#fields.errors('lastName')}" th:text="${err}" class="error" ></div>
+		<label for="formFile" class="form-label">Last Name:</label>
+        <input type="text" th:field="*{lastName}" class="form-control mb-4 col-4" placeholder="Last name" />
+
+        <div th:if="${!isUpdate}" th:each="err : ${#fields.errors('password')}" th:text="${err}" class="error" ></div>
+		<label for="formFile" class="form-label">Password:</label>
+        <input type="password" th:field="*{password}" class="form-control mb-4 col-4" placeholder="Password" />
+
+        <p>
+            <div class="form-check">
+                <input type="checkbox" name="enabled" class="form-check-input" value="1"
+                       th:text="Enabled"
+                       th:checked="${user.enabled}" /><input type="hidden" name="enabled" value="0"/>
+            </div>
+        </p>
+
+        <div th:if="${roleEmptyError}" th:text="${roleEmptyError}" class="error"></div>
+        <p>
+			<label>Roles:</label>
+            <div class="form-check" th:each="role : ${rolesList}">
+                <input type="checkbox" name="roles" class="form-check-input"
+                       th:text="${role.name}"
+                       th:value="${role.id}" th:field="*{roles}" />
+                        &nbsp;-&nbsp;
+                <label style="font-size: 13px; font-style: italic;" th:text="${role.description}"></label>
+            </div>
+        <p>
+
+        <div th:if="${photoError}" th:text="${photoError}" class="error"></div>
+        <div class="mb-3">
+			<label for="photo" class="form-label">Photo:</label>
+			<input class="form-control" type="file" id="photo" name="photo">
+		</div>
+
+        <p>
+            <span th:if="${isUpdate}">
+                <img id="selectedPhoto" class="img-thumbnail" th:src="@{/GetPhoto/{id}(id=${user.id})}" height="100px"
+                     width="100px" th:alt="${user.firstName+' '+user.lastName}" />
+            </span>
+            <span th:unless="${isUpdate}"><img id="selectedPhoto" src="" /></span>
+        </p>
+
+        <br>
+
+        <button id="userFormSubmitBtn" type="button" class="btn orange-background white">Save</button>
+        <a th:href="@{/Users}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+</div>
+
+<br>
+
+<div th:replace="fragments :: footer"></div>
+
+</body>

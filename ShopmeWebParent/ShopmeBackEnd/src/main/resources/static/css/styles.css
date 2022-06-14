@@ -1,0 +1,48 @@
+.divider:after,
+
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+.shopme-color {
+    background-color: #ff4f00;
+}
+
+.white {
+    color: #ffffff;
+}
+
+.left-align {
+    text-align: left;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0000EE;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+.black-color {
+    color: #000000;
+}
+
+.center {
+    text-align: center;
+}
+
+.shopme-text-color {
+    color: #ff4f00;
+}
