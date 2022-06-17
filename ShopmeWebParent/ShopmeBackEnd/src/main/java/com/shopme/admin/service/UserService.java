@@ -71,4 +71,6 @@ public interface UserService {
     List<User> search(String keyword);
 
     String generateQRUrl(User user) throws UnsupportedEncodingException;
+
+    //String findSecretBySecret()
 }

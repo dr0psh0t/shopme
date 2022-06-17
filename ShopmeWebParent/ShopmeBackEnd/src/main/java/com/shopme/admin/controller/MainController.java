@@ -4,8 +4,12 @@ import com.shopme.admin.entity.User;
 import com.shopme.admin.service.RoleService;
 import com.shopme.admin.service.UserService;
 import com.shopme.admin.utils.Log;
+import org.jboss.aerogear.security.otp.Totp;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,10 +29,12 @@ public class MainController {
 
 	private final RoleService roleService;
 	private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
 
-	public MainController(RoleService roleService, UserService userService) {
+	public MainController(RoleService roleService, UserService userService, PasswordEncoder passwordEncoder) {
 		this.roleService = roleService;
 		this.userService = userService;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@GetMapping("/")
@@ -46,7 +53,79 @@ public class MainController {
 	}
 
 	@GetMapping("/Login")
-	public String login() {
+	public String login(Model model) {
+		model.addAttribute("login", true);
+		return "login";
+	}
+
+	@GetMapping("/Security")
+	public String security(Model model) {
+		model.addAttribute("login", false);
+		return "login";
+	}
+
+	@PostMapping("/Verify")
+	public String verify(@RequestParam(value = "code") String code, HttpSession session, Model model) {
+
+		String username = session.getAttribute("username").toString();
+		String pass = session.getAttribute("password").toString();
+
+		User user = userService.findByEmail(username);
+
+		Totp totp = new Totp(user.getSecret());
+
+		if (!isValidLong(code) || !totp.verify(code)) {
+			Log.error("Invalid security code: "+code);
+			model.addAttribute("codeMessage", "Invalid security code");
+			return "login";
+		} else {
+			model.addAttribute("codeMessage", "You are verified.");
+			//	direct to /authenticateTheUser
+		}
+
+		model.addAttribute("login", false);
+
+		return "login";
+	}
+
+	@PostMapping("/Authenticate")
+	public String initialLogin(
+			@RequestParam(value = "username") String username,
+			@RequestParam(value = "password") String password,
+			Model model,
+			HttpSession session
+	) {
+
+		User user = userService.findByEmail(username);
+
+		if (user == null) {
+			Log.error("User returned is null. Cannot login.");
+			model.addAttribute("errorMsg", "Incorrect username or password.");
+			return "login";
+		}
+
+		if (!user.isEnabled()) {
+			Log.error("User is disabled. Enable the user to login.");
+			model.addAttribute("errorMsg", "User is locked.");
+			return "login";
+		}
+
+		if(!passwordEncoder.matches(password, user.getPassword())) {
+			model.addAttribute("errorMsg", "Incorrect password.");
+			return "login";
+		}
+
+		if (user.isUsing2FA()) {
+			model.addAttribute("login", false);
+
+			session.setAttribute("username", username);
+			session.setAttribute("password", password);
+
+			return "login";
+		} else {
+			// direct to /authenticateTheUser
+		}
+
 		return "login";
 	}
 
@@ -80,15 +159,6 @@ public class MainController {
 			@RequestParam(value = "using2FA") int using2FA,
 		   	Model model
 	) throws IOException {
-
-		/*
-		System.out.println("user="+user);
-		System.out.println("roles="+roles);
-		System.out.println("enabled="+enabled);
-		System.out.println("photo="+photo.getName());
-		System.out.println("using2FA="+using2FA);
-		errors.getFieldErrors().forEach(error -> System.out.println(error));
-		 */
 
 		model.addAttribute("rolesList", roleService.findAll());
 
@@ -180,5 +250,14 @@ public class MainController {
 	@GetMapping("/Profile")
 	public String profile() {
 		return "profile";
+	}
+
+	private boolean isValidLong(String code) {
+		try {
+			Long.parseLong(code);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 }
