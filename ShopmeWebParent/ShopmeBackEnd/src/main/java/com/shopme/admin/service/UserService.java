@@ -1,6 +1,7 @@
 package com.shopme.admin.service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +24,11 @@ public interface UserService {
 
     void saveUser(User rootUser);
 
-    User saveUser(User user, ArrayList<Integer> enableList,
-                  ArrayList<Integer> rolesList, MultipartFile photo,
+    User saveUser(User user, ArrayList<Integer> enableList, ArrayList<Integer> rolesList, MultipartFile photo,
                   boolean isUpdate) throws IOException;
+
+    User register(User user, ArrayList<Integer> enableList, ArrayList<Integer> rolesList, MultipartFile photo,
+                  int isUsing2FA) throws IOException;
 
     void saveRole(String name, String description);
 
@@ -66,4 +69,6 @@ public interface UserService {
     boolean ownerOwnedEmail(String email, int id);
 
     List<User> search(String keyword);
+
+    String generateQRUrl(User user) throws UnsupportedEncodingException;
 }

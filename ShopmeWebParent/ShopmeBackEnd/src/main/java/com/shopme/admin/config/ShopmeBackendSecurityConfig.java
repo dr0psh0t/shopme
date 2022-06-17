@@ -1,9 +1,11 @@
 package com.shopme.admin.config;
 
+import com.shopme.admin.dao.UserRepo;
 import com.shopme.admin.entity.Roles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,20 +19,25 @@ public class ShopmeBackendSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
+    private final UserRepo userRepo;
 
     public ShopmeBackendSecurityConfig(
-            UserDetailsService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+            UserDetailsService userDetailsService,
+            BCryptPasswordEncoder bCryptPasswordEncoder,
+            CustomWebAuthenticationDetailsSource authenticationDetailsSource,
+            UserRepo userRepo) {
 
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.authenticationDetailsSource = authenticationDetailsSource;
+        this.userRepo = userRepo;
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-            throws Exception {
-
-        auth.userDetailsService(userDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder);
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+        auth.authenticationProvider(authProvider());
     }
 
     @Override
@@ -50,6 +57,7 @@ public class ShopmeBackendSecurityConfig extends WebSecurityConfigurerAdapter {
 
         .and()
                 .formLogin()
+                .authenticationDetailsSource(authenticationDetailsSource)
                 .loginPage("/Login")
                 .loginProcessingUrl("/authenticateTheUser")
                 .defaultSuccessUrl("/")
@@ -68,5 +76,13 @@ public class ShopmeBackendSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean()
             throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authProvider() {
+        CustomAuthenticationProvider authProvider = new CustomAuthenticationProvider(userRepo);
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(bCryptPasswordEncoder);
+        return authProvider;
     }
 }

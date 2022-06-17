@@ -5,7 +5,6 @@ import com.shopme.admin.service.*;
 import com.shopme.admin.utils.Log;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -43,7 +42,8 @@ public class UserController {
             @RequestParam(value = "photo", required = false) MultipartFile photo,
             @RequestParam(value = "enabled") ArrayList<Integer> enabled,
             @RequestParam(value = "isUpdate") boolean isUpdate,
-            @RequestParam(value = "page") int page, Model model) throws IOException {
+            @RequestParam(value = "page") int page, Model model
+    ) throws IOException {
 
         model.addAttribute("rolesList", roleService.findAll());
         model.addAttribute("isUpdate", isUpdate);

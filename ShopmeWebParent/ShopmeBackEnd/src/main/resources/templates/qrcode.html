@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>QR Code</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/user-form.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
+
+</head>
+<body>
+<div class="container">
+    <div id="qr">
+        <p>
+            Scan this Barcode using Google Authenticator app on your phone
+            to use it later in login
+        </p>
+        <img th:src="${qr}"/>
+    </div>
+    <a th:href="@{/Login}" class="btn btn-primary">Go to login page</a>
+</div>
+</body>
+</html>

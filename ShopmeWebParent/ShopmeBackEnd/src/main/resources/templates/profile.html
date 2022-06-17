@@ -20,9 +20,24 @@
 <br>
 <div class="container">
 
+    <!--
     Logged user: <span sec:authentication="name"></span>
     <br>
     Roles: <span sec:authentication="principal.authorities"></span>
+    or
+    <span sec:authentication="principal"></span><br><br>
+    -->
+
+    <span sec:authentication="principal.id"></span><br>
+    <span sec:authentication="principal.email"></span><br>
+    <span sec:authentication="principal.enabled"></span><br>
+    <span sec:authentication="principal.firstName"></span><br>
+    <span sec:authentication="principal.lastName"></span><br>
+    <span sec:authentication="principal.password"></span><br>
+    <span sec:authentication="principal.filename"></span><br>
+    <span sec:authentication="principal.twoFactor"></span><br>
+    <span sec:authentication="principal.secret"></span><br>
+    <span sec:authentication="principal.roles"></span><br>
 
 </div>
 <br>

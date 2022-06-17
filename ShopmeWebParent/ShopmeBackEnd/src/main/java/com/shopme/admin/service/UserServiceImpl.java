@@ -7,6 +7,7 @@ import com.shopme.admin.entity.Role;
 import com.shopme.admin.entity.User;
 import com.shopme.admin.utils.Log;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.jboss.aerogear.security.otp.api.Base32;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import javax.transaction.Transactional;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -46,6 +48,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final ResourceLoader resourceLoader;
     private final Path root = Paths.get("ShopmeWebParent/ShopmeBackEnd/uploads");
     private final UserSpecification userSpecification;
+
+    public static final String QR_PREFIX =
+            "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
+
+    public static final String APP_NAME = "Shopme";
 
     public UserServiceImpl(UserRepo userRepo, RoleRepo roleRepo,
                            RoleService roleService, PasswordEncoder passwordEncoder, ResourceLoader resourceLoader,
@@ -113,6 +120,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void deleteAll() {
         userRepo.deleteAll();
+    }
+
+    @Override
+    public User register(User user, ArrayList<Integer> enableList, ArrayList<Integer> rolesList, MultipartFile photo,
+                         int isUsing2FA) throws IOException {
+
+        if (user != null) {
+            processUserPassword(user, false);
+            processRole(user, rolesList);
+            processPhoto(user, photo, false);
+            processEnabled(user, enableList);
+
+            user.setTwoFactor(isUsing2FA);
+            user.setSecret(Base32.random());
+
+            return userRepo.save(user);
+        } else {
+            throw new NullPointerException("Parameter \"user\" of type User is null");
+        }
     }
 
     @Override
@@ -390,6 +416,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public Page<User> findPage(int pageNumber) {
         return userRepo.findAll(PageRequest.of(pageNumber - 1, 10, Sort.by("id").descending()));
+    }
+
+    @Override
+    public String generateQRUrl(User user) throws UnsupportedEncodingException {
+
+        return QR_PREFIX + URLEncoder.encode(
+                String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s",
+                        APP_NAME, user.getEmail(), user.getSecret(), APP_NAME), "UTF-8");
     }
 
     private boolean isInt(String str) {

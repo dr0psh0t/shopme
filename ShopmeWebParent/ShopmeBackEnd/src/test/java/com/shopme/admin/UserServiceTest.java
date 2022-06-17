@@ -8,6 +8,7 @@ import com.shopme.admin.service.RoleService;
 import com.shopme.admin.service.UserService;
 import com.shopme.admin.utils.Log;
 import org.assertj.core.api.Assertions;
+import org.jboss.aerogear.security.otp.api.Base32;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -79,7 +80,7 @@ public class UserServiceTest {
         String pass = email;
 
         User newUser = new User().email(email).enabled(1).firstName(fname).lastName(lname).filename(filename)
-                .password(pass);
+                .password(pass).use2FA().secret(Base32.random());
 
         userService.saveUser(newUser, new ArrayList<>(Arrays.asList(1, 0)), roleService.getRolesIds(), null,
                 false);
@@ -279,7 +280,10 @@ public class UserServiceTest {
                 .enabled(1)
                 .firstName("Super")
                 .lastName("User")
-                .password(newEmail);
+                .filename(null)
+                .password(newEmail)
+                .use2FA()
+                .secret(Base32.random());
 
         userService.saveUser(root);
 
@@ -308,7 +312,9 @@ public class UserServiceTest {
                     .firstName("User "+number)
                     .lastName("User "+number)
                     .filename(null)
-                    .password("newuser"+number+"@gmail.com");
+                    .password("newuser"+number+"@gmail.com")
+                    .use2FA()
+                    .secret(Base32.random());
 
             try {
                 userService.saveUser(newUser, enabled, roles, null, false);

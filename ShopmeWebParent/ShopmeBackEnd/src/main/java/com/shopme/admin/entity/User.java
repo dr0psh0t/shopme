@@ -1,5 +1,7 @@
 package com.shopme.admin.entity;
 
+import org.jboss.aerogear.security.otp.api.Base32;
+
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.util.HashSet;
@@ -43,12 +45,17 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles = new HashSet<>();
 
+    @Column(name = "two_factor", columnDefinition = "integer default 0")
+    private int twoFactor;
+
+    @Column(name = "secret")
+    private String secret;
+
     public User() {}
 
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -56,13 +63,8 @@ public class User {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public int getEnabled() {
-        return enabled;
     }
 
     public void enable() {
@@ -75,11 +77,13 @@ public class User {
     public void setEnabled(int enabled) {
         this.enabled = enabled;
     }
+    public int getEnabled() {
+        return enabled;
+    }
 
     public String getFirstName() {
         return firstName;
     }
-
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -87,7 +91,6 @@ public class User {
     public String getLastName() {
         return lastName;
     }
-
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
@@ -95,7 +98,6 @@ public class User {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -103,12 +105,35 @@ public class User {
     public String getFilename() {
         return filename;
     }
-
     public void setFilename(String filename) {
         this.filename = filename;
     }
 
     public Set<Role> getRoles() { return roles; }
+
+    public void enable2FA() {
+        twoFactor = 1;
+    }
+    public void disable2FA() {
+        twoFactor = 0;
+    }
+    public boolean isUsing2FA() {
+        return twoFactor == 1;
+    }
+
+    public int getTwoFactor() {
+        return twoFactor;
+    }
+    public void setTwoFactor(int twoFactor) {
+        this.twoFactor = twoFactor;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
 
     public User id(int id) {
         this.id = id;
@@ -154,6 +179,16 @@ public class User {
         return this;
     }
 
+    public User use2FA() {
+        enable2FA();
+        return this;
+    }
+
+    public User secret(String sec) {
+        secret = sec;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -164,6 +199,8 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", password='" + password + '\'' +
                 ", filename='" + filename + '\'' +
+                ", twoFactor='" + twoFactor + '\'' +
+                ", secret='" + secret + '\'' +
                 ", roles=" + roles +
                 '}';
     }
