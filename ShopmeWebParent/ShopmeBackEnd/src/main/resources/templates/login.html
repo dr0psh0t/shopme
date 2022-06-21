@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
     <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
     <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/login.js}"></script>
 
     <link rel="shortcut icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
     <link rel="icon" th:href="@{/images/shopme.svg}" type="image/x-icon">
@@ -58,7 +59,7 @@
             <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
 
                 <!--
-                <form class="form-signin" action="#" th:action="@{/authenticateTheUser}" method="post">
+                <form class="form-signin" action="#" th:action="@{/authenticateTheUser}" method="get">
                     <div class="form-outline mb-4">
                         <label class="form-label" for="username">Email</label>
                         <input type="email" id="username" name="username" class="form-control form-control-lg" />
@@ -81,50 +82,29 @@
                                 <br>
                                 Verify if credential is locked.
                             </div>
-                        </span>7
+                        </span>
                     </div>
                 </form>
                 -->
 
                 <div th:if="${login}">
-                    <form class="form-signin" action="#" th:action="@{/Authenticate}" method="post">
-                        <div class="form-outline mb-4">
+                    <form id="formLogin" class="formLogin" action="#" th:action="@{/authenticateTheUser}" method="post">
+                        <div class="form-outline mb-4" id="divUsername">
                             <label class="form-label" for="username">Email</label>
-                            <input type="email" id="username" name="username" value="dagondondaryll@gmail.com" class="form-control form-control-lg" />
+                            <input type="email" id="username" name="username" class="form-control form-control-lg" />
                         </div>
-                        <div class="form-outline mb-3">
+                        <div class="form-outline mb-3" id="divPassword">
                             <label class="form-label" for="password">Password</label>
-                            <input type="password" id="password" name="password" value="dagondondaryll@gmail.com" class="form-control form-control-lg" />
+                            <input type="password" id="password" name="password" class="form-control form-control-lg" />
                         </div>
-                        <button type="submit" class="btn orange-background white">Sign in</button>
-                        <a th:href="@{/Registration}" class="btn orange-background white">Register</a>
-                        <br><br>
-                        <div class="d-flex">
-                        <span th:if="${errorMsg != null}">
-                            <div class="alert alert-danger col-xs-offset-1 col-xs-10">[[${errorMsg}]]</div>
-                        </span>
-                        </div>
-                    </form>
-                </div>
-
-                <div th:unless="${login}">
-                    <form class="form-signin" action="#" th:action="@{/Verify}" method="post">
-                        <div class="form-outline mb-3">
+                        <div class="form-outline mb-3" id="divCode" style="display: none;">
                             <label class="form-label" for="code">Code</label>
                             <input type="number" id="code" name="code" class="form-control form-control-lg" />
                         </div>
-                        <button type="submit" class="btn orange-background white">Sign in</button>
+                        <button id="btnLogin" type="button" class="btn orange-background white">Login</button>
+                        <a id="registerLink" th:href="@{/Registration}" class="btn orange-background white">Register</a>
+                        <button id="btnVerify" type="button" class="btn orange-background white" style="display:none;">Verify</button>
                         <br><br>
-                        <div class="d-flex">
-                        <span th:if="${errorMsg != null}">
-                            <div class="alert alert-danger col-xs-offset-1 col-xs-10">[[${errorMsg}]]</div>
-                        </span>
-                        </div>
-                        <div class="d-flex">
-                        <span th:if="${codeMessage != null}">
-                            <div class="alert alert-danger col-xs-offset-1 col-xs-10">[[${codeMessage}]]</div>
-                        </span>
-                        </div>
                     </form>
                 </div>
 
