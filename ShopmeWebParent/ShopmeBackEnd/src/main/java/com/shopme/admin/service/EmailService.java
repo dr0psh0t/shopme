@@ -13,7 +13,7 @@ public class EmailService {
         this.emailSender = emailSender;
     }
 
-    void sendMessage(String to, String subject, String text) {
+    public void sendMessage(String to, String subject, String text) {
 
         SimpleMailMessage message = new SimpleMailMessage();
 

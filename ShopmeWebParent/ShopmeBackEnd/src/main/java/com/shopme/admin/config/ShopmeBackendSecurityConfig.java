@@ -44,7 +44,7 @@ public class ShopmeBackendSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
-                .antMatchers("/Login", "/Authenticate").permitAll()
+                .antMatchers("/Login", "/Authenticate", "/api/message").permitAll()
 
                 .antMatchers("/SaveUser", "/AddUserForm", "/UpdateUserForm",
                         "/DeleteUser", "/Enable", "/Disable", "/CsvExport", "/ExcelExport",
